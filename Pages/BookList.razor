@@ -32,7 +32,7 @@
                         </ul>
                     </td>
                     <td class="border px-6 py-3">
-                        <button class="bg-blue-500 text-white hover:bg-blue-700 px-2 py-1 mr-2">
+                        <button @onclick = "(() => EditBook(book))" class="bg-blue-500 text-white hover:bg-blue-700 px-2 py-1 mr-2">
                             Edit
                         </button>
                         <button @onclick = "( () => deleteBook(book.Id))" class="bg-red-500 text-white hover:bg-red-700 px-2 py-1">
@@ -45,7 +45,7 @@
     </table>
 </div>
 
-<AddBook OnBookAdded="AddNewBook" OnBookEdited="EditBook"/>
+<AddBook EditingBook="EditingBook" OnBookAdded="AddNewBook" OnBookEdited="UpdateBook" />
 
 @code {
     private List<BookDto> books = new List<BookDto>()
@@ -56,6 +56,7 @@
         new BookDto { Id = Guid.NewGuid(), Title = "Book 4", Description = "Description 4", Authors = new List<AuthorDto>(){new AuthorDto {Id = Guid.NewGuid(), Name= "Author 4" } } },
 
     };
+    public BookDto EditingBook = null;
 
     private void deleteBook(Guid id)
     {
@@ -74,13 +75,13 @@
 
     private async Task EditBook(BookDto book)
     {
-        var bookToEdit = this.books.FirstOrDefault(b => b.Id == book.Id);
-        if (bookToEdit != null)
-        {
-            bookToEdit.Title = book.Title;
-            bookToEdit.Description = book.Description;
-            bookToEdit.Authors = book.Authors;
-        }
+        EditingBook= book;
+    }
+    private async Task UpdateBook(BookDto book)
+    {
+        var index = this.books.FindIndex(b => b.Id == book.Id);
+        this.books[index] = book;
+        EditingBook= null;
     }
 
 

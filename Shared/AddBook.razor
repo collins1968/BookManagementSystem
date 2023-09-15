@@ -1,7 +1,10 @@
 ﻿
 <div class="mt-4 p-4 bg-gray-100 rounded-lg shadow-lg">
+    
+
     <h2 class="text-xl font-semibold mb-4">Add Book</h2>
-    <EditForm Model="newBook" OnValidSubmit="AddNewBook">
+    <EditForm Model="newBook" OnValidSubmit="HandleSubmit">
+    
         <DataAnnotationsValidator />
         <div class="mb-4">
             <label for="Title" class="block text-gray-700 font-semibold mb-2">Title:</label>
@@ -22,29 +25,49 @@
                 <ValidationMessage For="@(() => author.Name)" class="text-red-500 mt-2" />
             </div>
         }
-        <button type="button" onclick="@(()=>newBook.Authors.Add(new AuthorDto()))">Add Author</button>
-        <div class="mb-4">
+        <button type="button" class="text-white bg-blue-500 mt-2 " onclick="@(()=>newBook.Authors.Add(new AuthorDto()))">Add Author</button>
+        <div class="mb-4 mt-2">
             <button type="submit" class="bg-green-500 text-white hover:bg-green-700 px-4 py-2 rounded-md">
-                Add Book
+           @(isEdit ? "Edit" : "Add") Book
             </button>
+
         </div>
     </EditForm>
 </div>
 
 @code {
-public BookDto newBook { get; set; } = new BookDto()
+    public BookDto newBook { get; set; } = new BookDto()
+     {
+                Id = Guid.NewGuid()
+     };
+
+    private bool isEdit = false;
+
+    [Parameter]
+    public EventCallback<BookDto> OnBookAdded { get; set; }
+
+    [Parameter]
+    public EventCallback<BookDto> OnBookEdited { get; set; }
+    [Parameter]
+    public BookDto EditingBook {
+        get=> newBook;
+        set {
+            newBook = value ?? newBook;
+            isEdit = value != null;
+        }
+    }
+
+    public void HandleSubmit()
+    {
+        if(isEdit)
         {
-            Id = Guid.NewGuid()
-        };
-
-[Parameter]
-public EventCallback<BookDto> OnBookAdded { get; set; }
-
-[Parameter]
-
-public EventCallback<BookDto> OnBookEdited { get; set; }
-
-
+            EditBook();
+        }
+        else
+        {
+            AddNewBook();
+        }
+    }
 
  public async Task AddNewBook()
  {
@@ -56,6 +79,7 @@ public EventCallback<BookDto> OnBookEdited { get; set; }
  {
     await OnBookEdited.InvokeAsync(newBook);
     newBook = new BookDto();
+    isEdit = false;
  }
 
 }
