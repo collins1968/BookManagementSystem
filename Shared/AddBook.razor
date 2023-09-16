@@ -1,7 +1,7 @@
-﻿
-<div class="mt-4 p-4 bg-gray-100 rounded-lg shadow-lg">
-    
+﻿@inject IJSRuntime JSRuntime
 
+
+<div class="mt-4 p-4 bg-gray-100 rounded-lg shadow-lg">
     <h2 class="text-xl font-semibold mb-4">Add Book</h2>
     <EditForm Model="newBook" OnValidSubmit="HandleSubmit">
     
@@ -30,7 +30,6 @@
             <button type="submit" class="bg-green-500 text-white hover:bg-green-700 px-4 py-2 rounded-md">
            @(isEdit ? "Edit" : "Add") Book
             </button>
-
         </div>
     </EditForm>
 </div>
@@ -38,7 +37,7 @@
 @code {
     public BookDto newBook { get; set; } = new BookDto()
      {
-                Id = Guid.NewGuid()
+        Id = Guid.NewGuid()
      };
 
     private bool isEdit = false;
@@ -73,6 +72,7 @@
  {
     await OnBookAdded.InvokeAsync(newBook);
     newBook = new BookDto();
+    AddSuccess();
  }
 
  public async Task EditBook()
@@ -80,6 +80,20 @@
     await OnBookEdited.InvokeAsync(newBook);
     newBook = new BookDto();
     isEdit = false;
+    EditSuccess();
  }
+
+    private void AddSuccess()
+    {
+        JSRuntime.InvokeVoidAsync("showAlert", "The Book was added successfully", "success");
+    }
+    private void EditSuccess()
+    {
+        JSRuntime.InvokeVoidAsync("showAlert", "The book was edited successfully", "success");
+    }
+    private void showError()
+    {
+        JSRuntime.InvokeVoidAsync("showAlert", "OOOOPs!", "error");
+    }
 
 }
